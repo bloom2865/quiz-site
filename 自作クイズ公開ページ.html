@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>競技クイズ自作問題集</title>
+    <!-- 外部CSSファイルの読み込み -->
+    <link rel="stylesheet" href="自作クイズ公開ページ.css">
+</head>
+<body>
+
+    <h1>競技クイズ自作問題集</h1>
+
+    <!-- 100問ごとのタブが自動生成される場所 -->
+    <div id="tabContainer" class="tab-container"></div>
+
+    <!-- クイズ一覧が表示される場所 -->
+    <div id="quizContainer">問題を読み込んでいます...</div>
+
+    <script>
+        let allQuizzes = [];
+        const ITEMS_PER_PAGE = 100; // 1タブあたりの表示問題数
+
+        // 1. 指定されたJSONファイルを読み込む関数
+        async function loadQuizData() {
+            try {
+                // 「クイズ問題集.json」を取得
+                const response = await fetch('クイズ問題集.json');
+                if (!response.ok) throw new Error('ファイルの読み込みに失敗しました');
+                
+                allQuizzes = await response.json();
+                
+                if (allQuizzes.length > 0) {
+                    createTabs();      // タブの生成
+                    displayQuizzes(0); // 最初の100問を表示
+                } else {
+                    document.getElementById('quizContainer').textContent = '問題データが空です。';
+                }
+            } catch (error) {
+                document.getElementById('quizContainer').textContent = 'エラー: 問題データを読み込めませんでした。「クイズ問題集.json」ファイルが正しい形式で配置されているか確認してください。';
+                console.error(error);
+            }
+        }
+
+        // 2. 問題数に応じてタブを自動生成する関数
+        function createTabs() {
+            const tabContainer = document.getElementById('tabContainer');
+            const totalItems = allQuizzes.length;
+            const tabCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+            for (let i = 0; i < tabCount; i++) {
+                const start = i * ITEMS_PER_PAGE + 1;
+                const end = Math.min((i + 1) * ITEMS_PER_PAGE, totalItems);
+                
+                const button = document.createElement('button');
+                button.className = `tab-button ${i === 0 ? 'active' : ''}`;
+                button.textContent = `${start}～${end}問`;
+                
+                button.addEventListener('click', () => {
+                    // タブの選択状態（見た目）を切り替え
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // クイズを表示して画面の最上部にスクロール
+                    displayQuizzes(i);
+                    window.scrollTo(0, 0);
+                });
+                tabContainer.appendChild(button);
+            }
+        }
+
+        // 3. クイズカードを生成して表示する関数
+        function displayQuizzes(pageIndex) {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = ''; 
+
+            const start = pageIndex * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const currentQuizzes = allQuizzes.slice(start, end);
+
+            currentQuizzes.forEach((quiz) => {
+                const card = document.createElement('div');
+                card.className = 'quiz-card';
+
+                // 問題番号の表示
+                const header = document.createElement('div');
+                header.className = 'quiz-header';
+                header.textContent = `No. ${quiz.number || ''}`;
+                card.appendChild(header);
+
+                // 問題文の表示
+                const qDiv = document.createElement('div');
+                qDiv.className = 'quiz-question';
+                qDiv.textContent = quiz.question;
+                card.appendChild(qDiv);
+
+                // ボタンと答えを表示するエリア
+                const actionArea = document.createElement('div');
+                actionArea.className = 'action-area';
+
+                // 「正解を表示」ボタン
+                const btn = document.createElement('button');
+                btn.className = 'show-answer-btn';
+                btn.textContent = '正解を表示';
+                
+                // 答えのテキストボックス
+                const aDiv = document.createElement('div');
+                aDiv.className = 'answer-box';
+                aDiv.textContent = quiz.answer;
+
+                // ボタンクリックで表示・非表示を切り替える（トグル機能）
+                btn.addEventListener('click', () => {
+                    if (aDiv.style.display === 'block') {
+                        aDiv.style.display = 'none';
+                        btn.textContent = '正解を表示';
+                    } else {
+                        aDiv.style.display = 'block';
+                        btn.textContent = '正解を隠す';
+                    }
+                });
+
+                actionArea.appendChild(btn);
+                actionArea.appendChild(aDiv);
+                card.appendChild(actionArea);
+
+                container.appendChild(card);
+            });
+        }
+
+        // ページを開いたときにJSONの読み込みを開始
+        loadQuizData();
+    </script>
+</body>
+</html>
