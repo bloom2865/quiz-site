@@ -113,14 +113,41 @@ h1 {
 }
 
 /* 答えの表示ボックス */
+/* 【修正】答えの表示ボックス（初期状態：透明で少し左にずらしておく） */
 .answer-box {
     font-size: 16px;
     font-weight: 700;
-    color: #e74c3c;
-    display: none; /* 初期状態は非表示 */
-    background-color: #fdf2f2;
-    padding: 8px 16px;
-    border-radius: 5px;
-    border: 1px dashed #f8b4b4;
+    color: #c0392b; /* 少し濃いめの競技クイズっぽい赤に */
+    background-color: #fff5f5;
+    padding: 8px 18px;
+    border-radius: 6px;
+    border-left: 4px solid #e74c3c; /* 左側に太い赤ラインを入れて引き締める */
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.1);
     word-break: break-all;
+    
+    /* アニメーションのための設定 */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+}
+
+/* 【追加】前に「A. 」という文字を自動で付与する（こだわり演出） */
+.answer-box::before {
+    content: "A. ";
+    font-size: 14px;
+    color: #e74c3c;
+    margin-right: 4px;
+    border: 1px solid #e74c3c;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background-color: #ffffff;
+}
+
+/* 【追加】ボタンが押されて「is-open」クラスがついた時の状態 */
+.answer-box.is-open {
+    display: block; /* 念のためJS側で競合しないよう、CSS側で制御 */
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0); /* 元の位置に滑り込みながらフェードイン */
 }
