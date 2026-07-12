@@ -114,20 +114,24 @@
                 const btn = document.createElement('button');
                 btn.className = 'show-answer-btn';
                 btn.textContent = '正解を表示';
-                
+        
                 // 答えのテキストボックス
                 const aDiv = document.createElement('div');
                 aDiv.className = 'answer-box';
                 aDiv.textContent = quiz.answer;
 
-                // ボタンクリックで表示・非表示を切り替える（トグル機能）
+                // 【修正】クラスの付け外しでアニメーションを制御する
                 btn.addEventListener('click', () => {
-                    if (aDiv.style.display === 'block') {
-                        aDiv.style.display = 'none';
-                        btn.textContent = '正解を表示';
-                    } else {
-                        aDiv.style.display = 'block';
+                    aDiv.classList.toggle('is-open'); // class="answer-box is-open" になる
+            
+                    if (aDiv.classList.contains('is-open')) {
                         btn.textContent = '正解を隠す';
+                        btn.style.backgroundColor = '#7f8c8d'; // 隠すボタンは少し控えめな色に
+                        btn.style.borderColor = '#7f8c8d';
+                    } else {
+                        btn.textContent = '正解を表示';
+                        btn.style.backgroundColor = ''; // 元の色に戻す
+                        btn.style.borderColor = '';
                     }
                 });
 
